@@ -1,12 +1,13 @@
 
-struct Node* list.add(struct Node* head, int new_data) {
-    struct Node* new_node = createNode(new_data);
-    new_node->next = head;
+struct Node* list.add() {
+    struct Node* new_node;
+    struct Node head = &new_node;
+    head->next = &new_node;
     return new_node;
 }
 
 void list_remove(struct Node** head, int element) { 
-   // int key is the element that is
+   // int element is the element that is
    // being removed
    
     struct Node *temp = *head, *prev = NULL;
