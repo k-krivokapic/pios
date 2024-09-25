@@ -1,3 +1,5 @@
+#include "serial.h"
+
 
 unsigned long get_timer_count() {
     unsigned long *timer_count_register = 0x3f003004;
@@ -12,6 +14,15 @@ void wait_lms() {
     }
 }
 
+int getEL() {
+    unsigned int el;
+    asm("mrs %0,CurrentEL"
+    : "=r"(el)
+    :
+    :);
+    return el>>2;
+}
+
 char glbl[128];
 
 void kernel_main() {
@@ -20,6 +31,8 @@ void kernel_main() {
 
     extern int __bss_start, __bss_end;
     char *bssstart, *bssend;
+
+    esp_printf(serial_putc, "Current Execution Level is %d\r\n", getEL());
 
     bssstart = &__bss_start;
     bssend = &__bss_end;

@@ -1,0 +1,33 @@
+#include <stdio.h>
+
+long buf[256];
+
+//head is at buf[0]
+
+struct obj {
+    struct obj *next; // 8 bytes
+    int payload1;    // 4 bytes
+    int payload2;    // 4 bytes
+};
+
+int main() {
+
+    struct obj *pObj =(struct obj*)&buf[4];
+    struct obj *pObj2 = (struct obj*)&buf[7];
+//these next two lines use for hw
+    long *ptr = &buf[4];
+    pOj->next = &buf[6];
+    *ptr = &buf[7]; // buf[4] = &buf[7]
+    pObj->next = &buf[6];
+
+    head = pObj; // head = &buf[4]
+    buf[4] = &buf[7];
+
+    pObj->next->next = NULL; //dereferences twice  
+  
+    buf[0] = (long)&buf[4];
+    buf[4] = (long)&buf[7];
+    buf[7] = 0;
+
+    return 0;
+}
