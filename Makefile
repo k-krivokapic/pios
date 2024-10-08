@@ -18,6 +18,7 @@ OBJS = \
 	list.o \
 	serial.o \
 	rprintf.o \
+	page.o \
 
 
 
