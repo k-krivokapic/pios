@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include "page.h"
+#define BASE_ADDRESS 0x100000
+
 
 struct ppage physical_page_array[128]; // 128 pages
 
 struct ppage *free_list = NULL;  // head of list
 
 void init_pfa_list(void) {
-    unsigned long base_address = 0x0;
+    unsigned long base_address = BASE_ADDRESS;
 
     // traverse the physical page array
     for (int i = 0; i < 128; i++) {
