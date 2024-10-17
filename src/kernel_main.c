@@ -1,4 +1,8 @@
 #include "serial.h"
+#include "mmu.h"
+
+
+extern struct table_descriptor_stage1 L1table[512];
 
 
 unsigned long get_timer_count() {
@@ -27,10 +31,14 @@ char glbl[128];
 
 void kernel_main() {
 //adding a comment
+
     int timer = get_timer_count();
 
     extern int __bss_start, __bss_end;
     char *bssstart, *bssend;
+
+    mapPages((void*)0x0, (void*)0x0);
+    int result = loadPageTable(L1table);
 
     esp_printf(serial_putc, "Current Execution Level is %d\r\n", getEL());
 
