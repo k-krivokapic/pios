@@ -27,41 +27,54 @@ struct dir_entry {
     uint32_t size;         // file size in bytes
 } __attribute__((packed));
 
+// helper method for fatInit
+
+int pios_strncmp(const char *str1, const char *str2, size_t n) {
+    while (n-- > 0) {
+        if (*str1 != *str2) {
+            return (*(unsigned char *)str1 - *(unsigned char *)str2);
+        }
+        if (*str1 == '\0') {
+            return 0;
+        }
+        str1++;
+        str2++;
+    }
+    return 0;
+}
+
 
 int fatInit() {
+    sd_init();
     // read boot sector (sector 0) into memory
     sd_readblock(0, bootSector, 1);    // read sector 0 from disk into bootSector
     bs = (struct boot_sector *)bootSector;    // point struct to bootSector
+					  
+    unsigned char buffer[SECTOR_SIZE];
+
+    if (sd_readblock(0, bootSector, 1) != SECTOR_SIZE) {
+        return -1;
+    }
+
+//    memcpy(bs, buffer, sizeof(struct boot_sector));
 
     // validate boot signature
     if (bs->boot_signature != 0xAA55) {
         return -1;  // Invalid boot signature
     }
 
-    // validate file system type (FAT12)
-    int pios_strncmp(const char *str1, const char *str2, size_t n) {
-    while (n-- > 0) {
-        // reached the end of either string or they differ
-        if (*str1 != *str2) {
-            return (*(unsigned char *)str1 - *(unsigned char *)str2);
-        }
-        // both characters are the same, move to the next characters
-        if (*str1 == '\0') {
-            return 0; // reached end of str1
-        }
-        str1++;
-        str2++;
-    }
-    return 0; // first n characters are equal
-}
-
-    if (pios_strncmp(bs->fs_type, FAT_TYPE, 5) != 0) {
+    if (pios_strncmp(bs->fs_type, FAT_TYPE, 8) != 0) {
         return -1;  // invalid file system type
     }
 
     // read the FAT table into memory
     int fat_start_sector = bs->num_reserved_sectors;
     sd_readblock(fat_start_sector, fat_table, 8);    // assuming FAT size fits in 8 sectors
+    //int sectors_to_read = bs->num_sectors_per_fat * bs->num_fat_tables;
+
+//    if (sd_readblock(fat_start_sector, fat_table, sectors_to_read) != 0) {
+  //      return -1;  // Error reading FAT table
+   // }
 
     // compute root sector
     root_sector = bs->num_fat_tables * bs->num_sectors_per_fat + bs->num_reserved_sectors + bs->num_hidden_sectors;
@@ -70,6 +83,7 @@ int fatInit() {
 }
 
 // supporting method for fatOpen
+
 int compare_names(const char *name1, const char *name2, int length) {
     for (int i = 0; i < length; i++) {
         if (name1[i] != name2[i]) {
@@ -84,11 +98,13 @@ int fatOpen(const char *filepath) {
     int root_dir_sector = root_sector; // start of root directory region
     int entries_per_sector = SECTOR_SIZE / sizeof(struct dir_entry);
     char buffer[SECTOR_SIZE];
+    int num_root_dir_sectors = (bs->num_root_dir_entries * sizeof(struct dir_entry) + SECTOR_SIZE - 1) / SECTOR_SIZE;
+
 
     // assume we have parsed "target_name" from "filepath" as "/BIN/BASH"
     char target_name[11] = { 'B', 'I', 'N', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' };
 
-    for (int sector = root_dir_sector; /* condition to end loop */; sector++) {
+    for (int sector = root_dir_sector; sector < (root_dir_sector + num_root_dir_sectors); sector++) {
         // read each sector in the root directory
         sd_readblock(sector, buffer, 1);
 

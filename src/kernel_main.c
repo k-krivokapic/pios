@@ -42,22 +42,22 @@ void kernel_main() {
     // Initialize the filesystem
     int init_status = fatInit();
     if (init_status != 0) {
-	esp_printf("Failed to initialize FAT filesystem: %d\n", init_status);
+	esp_printf(serial_putc, "Failed to initialize FAT filesystem: %d\n", init_status);
         return;  // Exit if initialization fails
     }
-    esp_printf("FAT filesystem initialized successfully: %d\n", init_status);
+    esp_printf(serial_putc, "FAT filesystem initialized successfully: %d\n", init_status);
 
     // Variables to store file details
     unsigned int start_cluster;
     unsigned int file_size;
 
     // Open a file, for example "/BIN/BASH"
-    int open_status = fatOpen("/BIN/BASH", &start_cluster, &file_size);
+    int open_status = fatOpen("/mnt/disk/testfile.txt", &start_cluster, &file_size);
     if (open_status != 0) {
-	esp_printf("Failed to open /BIN/BASH: : %d\n", open_status);
+	esp_printf(serial_putc, "Failed to open: : %d\n", open_status);
         return;  // Exit if file opening fails
     }
-    esp_printf("File /BIN/BASH opened successfullyStart cluster: %u, File size: %u bytes.\n", start_cluster, file_size);
+    esp_printf(serial_putc, "File opened successfully. Start cluster: %u, File size: %u bytes.\n", start_cluster, file_size);
 
     // Allocate a buffer to read file data
     unsigned char buffer[file_size];
@@ -65,10 +65,10 @@ void kernel_main() {
     // Read the file contents
     int bytes_read = fatRead(start_cluster, buffer, file_size);
     if (bytes_read != file_size) {
-	esp_printf("Error: Expected to read %u bytes but only read %d bytes.\n", file_size, bytes_read);
+	esp_printf(serial_putc, "Error: Expected to read %u bytes but only read %d bytes.\n", file_size, bytes_read);
         return;    
     }
-    esp_printf("File data read successfully. Total bytes read: %d.\n", bytes_read);
+    esp_printf(serial_putc, "File data read successfully. Total bytes read: %d.\n", bytes_read);
 
     mapPages((void*)0x0, (void*)0x0);
     int result = loadPageTable(L1table);
