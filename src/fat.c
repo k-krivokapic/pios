@@ -56,8 +56,6 @@ int fatInit() {
         return -1;
     }
 
-//    memcpy(bs, buffer, sizeof(struct boot_sector));
-
     // validate boot signature
     if (bs->boot_signature != 0xAA55) {
         return -1;  // Invalid boot signature

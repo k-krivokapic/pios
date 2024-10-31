@@ -40,19 +40,19 @@ void kernel_main() {
     char *bssstart, *bssend;
 
     // Initialize the filesystem
-    int init_status = fatInit();
+/*    int init_status = fatInit();
     if (init_status != 0) {
 	esp_printf(serial_putc, "Failed to initialize FAT filesystem: %d\n", init_status);
         return;  // Exit if initialization fails
     }
     esp_printf(serial_putc, "FAT filesystem initialized successfully: %d\n", init_status);
-
+*/
     // Variables to store file details
     unsigned int start_cluster;
     unsigned int file_size;
 
-    // Open a file, for example "/BIN/BASH"
-    int open_status = fatOpen("/mnt/disk/testfile.txt", &start_cluster, &file_size);
+    // Open a file
+    int open_status = fatOpen("testfile.txt", &start_cluster, &file_size);
     if (open_status != 0) {
 	esp_printf(serial_putc, "Failed to open: : %d\n", open_status);
         return;  // Exit if file opening fails
